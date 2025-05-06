@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaUser, FaEnvelope, FaLock, FaPhone } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/authContext';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -15,52 +16,28 @@ export default function Register() {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { register } = useAuth();
   
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
     
-    // Basic validation
-    if (Object.values(formData).some(value => !value)) {
-      setError('All fields are required');
-      return;
+    try {
+      await register(formData);
+      router.push('/login');
+    } catch (err) {
+      setError(err.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-    
-    // Mobile number validation
-    if (!/^[0-9]{10}$/.test(formData.mobileNumber)) {
-      setError('Please enter a valid 10-digit mobile number');
-      return;
-    }
-    
-    // Password validation
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-    
-    // Confirm password validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    
-    // In a real application, you would send this data to your API
-    console.log('Registration data:', formData);
-    
-    // For demonstration purposes, we'll just redirect to home
-    router.push('/');
   };
   
   const inputFields = [
@@ -107,32 +84,29 @@ export default function Register() {
   ];
   
   return (
-    <div className="min-h-screen  py-1">
-      <div className="container  mx-auto px-4 ">
+    <div className="min-h-screen py-1">
+      <div className="container mx-auto px-4">
         
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden"
         >
-            <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className='flex justify-center'
           >
-             <Link href="/" >
-            <img 
-              src="/images/logo.png" 
-              alt="Logo" 
-              className="logo_container"
-            />
-         
-         </Link>
-        
-         </motion.div>
-       
+            <Link href="/">
+              <img 
+                src="/images/logo.png" 
+                alt="Logo" 
+                className="logo_container"
+              />
+            </Link>
+          </motion.div>
           
           <div className="p-6">
             {error && (
@@ -162,7 +136,8 @@ export default function Register() {
                       {field.icon}
                     </div>
                     <input
-                      id={field.id}
+                      
+                        id={field.id}
                       name={field.name}
                       type={field.type}
                       value={formData[field.name]}
@@ -178,9 +153,10 @@ export default function Register() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full  text-white py-3 rounded-lg font-medium bg-green-600 transition mt-2"
+                disabled={isLoading}
+                className="w-full text-white py-3 rounded-lg font-medium bg-green-600 transition mt-2 disabled:bg-green-400"
               >
-                Create Account
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </motion.button>
             </form>
             

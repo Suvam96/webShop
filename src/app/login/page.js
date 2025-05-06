@@ -2,40 +2,50 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FaEnvelope, FaLock, FaPhone } from 'react-icons/fa';
+import { FaLock, FaPhone } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/authContext';
 
 export default function Login() {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
     
     // Basic validation
     if (!mobileNumber || !password) {
       setError('All fields are required');
+      setIsLoading(false);
       return;
     }
     
     // Simple mobile number validation
     if (!/^[0-9]{10}$/.test(mobileNumber)) {
       setError('Please enter a valid 10-digit mobile number');
+      setIsLoading(false);
       return;
     }
     
-    // In a real application, you would send this data to your API
-    console.log('Login attempt:', { mobileNumber, password });
-    
-    // For demonstration purposes, we'll just redirect to home
-    router.push('/');
+    try {
+      await login(mobileNumber, password);
+      router.push('/');
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
-    <div className="min-h-screen  py-12">
+    <div className="min-h-screen py-12">
       <div className="container mx-auto px-4">
         
         <motion.div 
@@ -50,18 +60,17 @@ export default function Login() {
             transition={{ duration: 0.5 }}
             className='flex justify-center'
           >
-             <Link href="/"  >
-            <img 
-              src="/images/logo.png" 
-              alt="Logo" 
-              className="logo_container"
-            />
-         
-         </Link>
-         </motion.div>
+            <Link href="/">
+              <img 
+                src="/images/logo.png" 
+                alt="Logo" 
+                className="logo_container"
+              />
+            </Link>
+          </motion.div>
           <div className="bg-primary py-6 px-4 text-center">
-            <h1 className="text-2xl font-bold ">Welcome Back!</h1>
-            <p className=" text-opacity-80">Sign in to your webShop account</p>
+            <h1 className="text-2xl font-bold">Welcome Back!</h1>
+            <p className="text-opacity-80">Sign in to your webShop account</p>
           </div>
           
           <div className="p-6">
@@ -119,9 +128,10 @@ export default function Login() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full  text-white py-3 rounded-lg font-medium bg-green-600 transition"
+                disabled={isLoading}
+                className="w-full text-white py-3 rounded-lg font-medium bg-green-600 transition disabled:bg-green-400"
               >
-                Sign In
+                {isLoading ? 'Signing In...' : 'Sign In'}
               </motion.button>
             </form>
             
