@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/authContext";
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user } = useAuth();
-
+  const { logout } = useAuth();
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -130,7 +130,6 @@ export default function Header() {
                   <button
                     className="px-4 py-2 text-left hover:"
                     onClick={() => {
-                      const { logout } = useAuth();
                       logout();
                       setIsMenuOpen(false);
                     }}
