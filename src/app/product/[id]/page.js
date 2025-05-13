@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+
 import {
   FaStar,
   FaHeart,
@@ -66,7 +68,7 @@ const products = [
     relatedProducts: [2, 3, 4],
   },
   {
-    id: "1",
+    id: 1,
     name: "Organic Bananas",
     price: 2.99,
     oldPrice: 3.99,
@@ -91,7 +93,7 @@ const products = [
     relatedProducts: [2, 3, 4],
   },
   {
-    id: "2",
+    id: 2,
     name: "Fresh Strawberries",
     price: 4.99,
     oldPrice: 5.99,
@@ -126,13 +128,15 @@ export default function ProductDetail({ params }) {
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("description");
+  const param = useParams();
+  const id = parseInt(param.id); // 👈 Convert string to number
 
   useEffect(() => {
     // Simulate API fetch
     const fetchProduct = () => {
       setIsLoading(true);
       // In a real app, fetch from API using params.id
-      const foundProduct = products.find((p) => p.id === params.id);
+      const foundProduct = products.find((p) => p.id === id);
       setProduct(foundProduct);
       setIsLoading(false);
     };

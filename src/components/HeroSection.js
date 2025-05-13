@@ -25,9 +25,6 @@ export default function HeroSection() {
               <Link href="/" className="btn-primary hero_button">
                 Shop Now
               </Link>
-              <Link href="/" className="btn-outline hero_button">
-                Browse Categories
-              </Link>
             </div>
           </motion.div>
 
